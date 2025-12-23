@@ -1,0 +1,100 @@
+services:
+  - type: web
+    name: user-service
+    env: docker
+    region: oregon
+    dockerfilePath: user_service/Dockerfile
+    plan: starter
+    envVars:
+      - key: PORT
+        value: "3000"
+      - key: MONGO_URI
+        value: "mongodb+srv://jagath:jagath08@cluster0.sgk5s43.mongodb.net/users_db?retryWrites=true&w=majority"
+      - key: JWT_SECRET
+        value: "jagath08"
+      - key: JWT_EXPIRES_IN
+        value: "7d"
+      - key: RABBITMQ_URL
+        value: "amqps://mogbhzxw:u3Wy7tLNgNeIwI_wl8WpjoXepQF4GBUD@fuji.lmq.cloudamqp.com/mogbhzxw"
+
+  - type: web
+    name: restaurant-service
+    env: docker
+    region: oregon
+    dockerfilePath: restaurant_service/Dockerfile
+    plan: starter
+    envVars:
+      - key: PORT
+        value: "3001"
+      - key: MONGO_URI
+        value: "mongodb+srv://jagath:jagath08@cluster0.sgk5s43.mongodb.net/restaurant_db?retryWrites=true&w=majority"
+      - key: ADMIN_SECRET
+        value: "jagath08"
+      - key: RABBITMQ_URL
+        value: "amqps://mogbhzxw:u3Wy7tLNgNeIwI_wl8WpjoXepQF4GBUD@fuji.lmq.cloudamqp.com/mogbhzxw"
+
+  - type: web
+    name: order-service
+    env: docker
+    region: oregon
+    dockerfilePath: order_service/Dockerfile
+    plan: starter
+    envVars:
+      - key: PORT
+        value: "8080"
+      - key: MONGO_URI
+        value: "mongodb+srv://jagath:jagath08@cluster0.sgk5s43.mongodb.net/orders_db?retryWrites=true&w=majority"
+      - key: RABBITMQ_URL
+        value: "amqps://mogbhzxw:u3Wy7tLNgNeIwI_wl8WpjoXepQF4GBUD@fuji.lmq.cloudamqp.com/mogbhzxw"
+      - key: RESTAURANT_SERVICE_URL
+        value: "https://restaurant-service-REPLACE.onrender.com"
+
+  - type: web
+    name: delivery-service
+    env: docker
+    region: oregon
+    dockerfilePath: delivery_service/Dockerfile
+    plan: starter
+    envVars:
+      - key: PORT
+        value: "8000"
+      - key: RABBITMQ_URL
+        value: "amqps://mogbhzxw:u3Wy7tLNgNeIwI_wl8WpjoXepQF4GBUD@fuji.lmq.cloudamqp.com/mogbhzxw"
+      - key: EXCHANGE
+        value: "food_orders"
+
+  - type: web
+    name: notification-service
+    env: docker
+    region: oregon
+    dockerfilePath: notification_service/Dockerfile
+    plan: starter
+    envVars:
+      - key: PORT
+        value: "8100"
+      - key: RABBITMQ_URL
+        value: "amqps://mogbhzxw:u3Wy7tLNgNeIwI_wl8WpjoXepQF4GBUD@fuji.lmq.cloudamqp.com/mogbhzxw"
+      - key: EXCHANGE
+        value: "food_orders"
+      - key: MONGO_URI
+        value: "mongodb+srv://jagath:jagath08@cluster0.sgk5s43.mongodb.net/notification_db?retryWrites=true&w=majority"
+
+  - type: web
+    name: gateway
+    env: docker
+    region: oregon
+    dockerfilePath: gateway/Dockerfile
+    plan: starter
+    envVars:
+      - key: USER_SERVICE_URL
+        value: "https://user-service-REPLACE.onrender.com"
+      - key: RESTAURANT_SERVICE_URL
+        value: "https://restaurant-service-REPLACE.onrender.com"
+      - key: ORDER_SERVICE_URL
+        value: "https://order-service-REPLACE.onrender.com"
+      - key: DELIVERY_SERVICE_URL
+        value: "https://delivery-service-REPLACE.onrender.com"
+      - key: NOTIFICATION_SERVICE_URL
+        value: "https://notification-service-REPLACE.onrender.com"
+      - key: FRONTEND_ORIGIN
+        value: "https://your-vercel-app.vercel.app"
