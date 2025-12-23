@@ -1,0 +1,11 @@
+com\order\controller\OrderController$HealthResponse.class
+com\order\controller\OrderController.class
+com\order\model\OrderItem.class
+com\order\repository\OrderRepository.class
+com\order\controller\OrderController$OrderPlacedEvent.class
+com\order\controller\OrderController$ErrorResponse.class
+com\order\model\Order.class
+com\order\App.class
+com\order\client\RestaurantClient.class
+com\order\model\OrderRequest.class
+com\order\messaging\RabbitPublisher.class

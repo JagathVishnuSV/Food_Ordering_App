@@ -1,0 +1,115 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  user-service:
+    build:
+      context: ./user_service
+    environment:
+      - PORT=3000
+      - MONGO_URI=mongodb+srv://jagath:jagath08@cluster0.sgk5s43.mongodb.net/users_db?retryWrites=true&w=majority
+      - JWT_SECRET=jagath08
+      - JWT_EXPIRES_IN=7d
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+    depends_on:
+      - rabbitmq
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+  restaurant-service:
+    build:
+      context: ./restaurant_service
+    environment:
+      - PORT=3001
+      - MONGO_URI=mongodb+srv://jagath:jagath08@cluster0.sgk5s43.mongodb.net/restaurant_db?retryWrites=true&w=majority
+      - ADMIN_SECRET=jagath08
+    depends_on:
+      - rabbitmq
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+
+  order-service:
+    build:
+      context: ./order_service
+    environment:
+      - PORT=8080
+      - MONGO_URI=mongodb+srv://jagath:jagath08@cluster0.sgk5s43.mongodb.net/orders_db?retryWrites=true&w=majority
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - RESTAURANT_SERVICE_URL=http://restaurant-service:3001
+    depends_on:
+      - rabbitmq
+      - restaurant-service
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  delivery-service:
+    build:
+      context: ./delivery_service
+    environment:
+      - PORT=8000
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - EXCHANGE=food_orders
+    depends_on:
+      - rabbitmq
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  notification-service:
+    build:
+      context: ./notification_service
+    environment:
+      - PORT=8100
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - EXCHANGE=food_orders
+      - MONGO_URI=mongodb+srv://jagath:jagath08@cluster0.sgk5s43.mongodb.net/notification_db?retryWrites=true&w=majority
+    depends_on:
+      - rabbitmq
+    ports:
+      - "8100:8100"
+    restart: unless-stopped
+  
+  gateway-1:
+    build:
+      context: ./gateway
+    container_name: gateway-1
+    depends_on:
+      - user-service
+      - restaurant-service
+      - order-service
+      - delivery-service
+      - notification-service
+    restart: unless-stopped
+
+  gateway-2:
+    build:
+      context: ./gateway
+    container_name: gateway-2
+    depends_on:
+      - user-service
+      - restaurant-service
+      - order-service
+      - delivery-service
+      - notification-service
+    restart: unless-stopped
+
+  lb:
+    image: haproxy:2.8-alpine
+    container_name: gateway-lb
+    volumes:
+      - ./lb/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - gateway-1
+      - gateway-2
+    restart: unless-stopped
