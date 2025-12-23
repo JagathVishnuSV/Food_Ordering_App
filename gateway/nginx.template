@@ -1,0 +1,52 @@
+# gateway/nginx.template
+server {
+  listen 80;
+  server_name _;
+
+  # OPTIONAL CORS: enable only if you want gateway to set CORS headers.
+  # If backends already set CORS, keep this block commented to avoid duplicates.
+  if ($request_method = 'OPTIONS') {
+    add_header 'Access-Control-Allow-Origin' "$FRONTEND_ORIGIN" always;
+    add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+    add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type' always;
+    add_header 'Access-Control-Allow-Credentials' 'true' always;
+    return 204;
+  }
+
+  location /api/ {
+    proxy_pass $USER_SERVICE_URL;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  }
+
+  location /restaurants/ {
+    proxy_pass $RESTAURANT_SERVICE_URL;
+    proxy_set_header Host $host;
+  }
+
+  location /order {
+    proxy_pass $ORDER_SERVICE_URL;
+    proxy_set_header Host $host;
+  }
+
+  location /orders/ {
+    proxy_pass $ORDER_SERVICE_URL;
+    proxy_set_header Host $host;
+  }
+
+  location /delivery/ {
+    proxy_pass $DELIVERY_SERVICE_URL;
+    proxy_set_header Host $host;
+  }
+
+  location /notifications/ {
+    proxy_pass $NOTIFICATION_SERVICE_URL;
+    proxy_set_header Host $host;
+  }
+
+  # static fallback (if needed)
+  location / {
+    return 404;
+  }
+}
