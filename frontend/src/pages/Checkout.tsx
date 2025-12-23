@@ -22,15 +22,22 @@ import { Delete, ArrowBack } from '@mui/icons-material';
 
 export default function Checkout() {
   const navigate = useNavigate();
-  const { items, removeItem, clearCart, total } = useCart();
+  const { items, removeItem, clearCart, getTotal } = useCart();
   const { user } = useAuth();
   const [error, setError] = useState('');
+  const total = getTotal();
 
   const placeOrderMutation = useMutation({
     mutationFn: orderApi.placeOrder,
     onSuccess: (order) => {
       clearCart();
-      navigate(`/order/${order.id}`);
+      // Navigate to order history with success message
+      navigate('/orders', { 
+        state: { 
+          newOrderId: order.id,
+          message: 'Order placed successfully! Track your order below.' 
+        } 
+      });
     },
     onError: (err: any) => {
       setError(err.response?.data?.message || 'Failed to place order');
@@ -49,8 +56,9 @@ export default function Checkout() {
       userId: user._id,
       restaurantId,
       items: items.map((item) => ({
+        menuItemId: item.name,
         name: item.name,
-        price: item.finalPrice || item.price,
+        price: item.price,
         qty: item.quantity,
       })),
     };
@@ -70,50 +78,99 @@ export default function Checkout() {
 
   return (
     <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <IconButton onClick={() => navigate(-1)} sx={{ mr: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+        <IconButton 
+          onClick={() => navigate(-1)} 
+          sx={{ 
+            mr: 2,
+            background: 'rgba(99, 102, 241, 0.1)',
+            '&:hover': { background: 'rgba(99, 102, 241, 0.2)' },
+          }}
+        >
           <ArrowBack />
         </IconButton>
-        <Typography variant="h4" component="h1">
+        <Typography variant="h3" component="h1" fontWeight="bold">
           Checkout
         </Typography>
       </Box>
 
-      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
+      <Paper elevation={0} sx={{ p: 4, mb: 3, borderRadius: 3 }}>
+        <Typography variant="h5" gutterBottom fontWeight="bold" sx={{ mb: 3 }}>
           Order from {items[0].restaurantName}
         </Typography>
         
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        {error && (
+          <Alert 
+            severity="error" 
+            sx={{ 
+              mb: 3, 
+              borderRadius: 2,
+              '& .MuiAlert-icon': { color: 'error.main' },
+            }}
+          >
+            {error}
+          </Alert>
+        )}
 
-        <List>
+        <List sx={{ mb: 2 }}>
           {items.map((item, index) => (
             <div key={item.name}>
               <ListItem
+                sx={{ 
+                  px: 2, 
+                  py: 2,
+                  '&:hover': {
+                    background: 'rgba(99, 102, 241, 0.05)',
+                    borderRadius: 2,
+                  },
+                }}
                 secondaryAction={
-                  <IconButton edge="end" onClick={() => removeItem(item.name)}>
+                  <IconButton 
+                    edge="end" 
+                    onClick={() => removeItem(item.name)}
+                    sx={{ 
+                      color: 'error.main',
+                      '&:hover': { background: 'rgba(239, 68, 68, 0.1)' },
+                    }}
+                  >
                     <Delete />
                   </IconButton>
                 }
               >
                 <ListItemText
-                  primary={`${item.name} x${item.quantity}`}
-                  secondary={`$${(item.finalPrice || item.price).toFixed(2)} each`}
+                  primary={
+                    <Typography variant="h6" fontWeight="bold">
+                      {item.name} × {item.quantity}
+                    </Typography>
+                  }
+                  secondary={
+                    <Typography variant="body2" color="text.secondary">
+                      ${(item.finalPrice || item.price).toFixed(2)} each
+                    </Typography>
+                  }
                 />
-                <Typography variant="body1" sx={{ mr: 2 }}>
+                <Typography variant="h6" fontWeight="bold" sx={{ mr: 6 }}>
                   ${((item.finalPrice || item.price) * item.quantity).toFixed(2)}
                 </Typography>
               </ListItem>
-              {index < items.length - 1 && <Divider />}
+              {index < items.length - 1 && <Divider sx={{ my: 1 }} />}
             </div>
           ))}
         </List>
 
-        <Divider sx={{ my: 2 }} />
+        <Divider sx={{ my: 3 }} />
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6">Total:</Typography>
-          <Typography variant="h6" color="primary">
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h5" fontWeight="bold">Total:</Typography>
+          <Typography 
+            variant="h4" 
+            fontWeight="bold"
+            sx={{
+              background: 'linear-gradient(135deg, #6366f1, #ec4899)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
+          >
             ${total.toFixed(2)}
           </Typography>
         </Box>
@@ -122,11 +179,20 @@ export default function Checkout() {
           variant="contained"
           size="large"
           fullWidth
-          sx={{ mt: 3 }}
+          sx={{ 
+            mt: 2, 
+            py: 1.5,
+            fontSize: '1.1rem',
+            borderRadius: 2,
+          }}
           onClick={handlePlaceOrder}
           disabled={placeOrderMutation.isPending}
         >
-          {placeOrderMutation.isPending ? <CircularProgress size={24} /> : 'Place Order'}
+          {placeOrderMutation.isPending ? (
+            <CircularProgress size={24} sx={{ color: 'white' }} />
+          ) : (
+            'Place Order'
+          )}
         </Button>
       </Paper>
     </Container>

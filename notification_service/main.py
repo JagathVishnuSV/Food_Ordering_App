@@ -5,6 +5,7 @@ import time
 from typing import Dict, Any, List
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import pika
 
@@ -22,6 +23,15 @@ MONGO_URI = os.getenv("MONGO_URI", "")
 PORT = int(os.getenv("PORT", "8100"))
 
 app = FastAPI(title="Notification Service")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # in-memory store: userId -> list of notifications
 notifications: Dict[str, List[Dict[str, Any]]] = {}

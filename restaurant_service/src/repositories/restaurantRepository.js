@@ -17,6 +17,14 @@ class RestaurantRepository {
   async updatePricing(id, pricingRules) {
     return Restaurant.findByIdAndUpdate(id, { pricingRules }, { new: true }).exec();
   }
+
+  async addMenuItem(id, menuItem) {
+    return Restaurant.findByIdAndUpdate(
+      id,
+      { $push: { menu: menuItem } },
+      { new: true }
+    ).exec();
+  }
 }
 
 module.exports = new RestaurantRepository();

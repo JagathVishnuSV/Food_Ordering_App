@@ -6,6 +6,7 @@ from uuid import uuid4
 from typing import Dict, Any
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import pika
 
@@ -16,6 +17,15 @@ EXCHANGE = os.getenv("EXCHANGE", "food_orders")
 PORT = int(os.getenv("PORT", "8000"))
 
 app = FastAPI(title="Delivery Service")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 assignments: Dict[str, Dict[str, Any]] = {}
 assign_lock = threading.Lock()
@@ -35,6 +45,9 @@ def publish(event_key: str, payload: dict):
         print("Publish error:", e)
 
 def simulate_delivery(order_id: str):
+    # Wait 10 seconds before assigning rider
+    time.sleep(10)
+    
     with assign_lock:
         assignment = assignments.get(order_id)
         if not assignment:
@@ -43,9 +56,10 @@ def simulate_delivery(order_id: str):
         assignment["rider_id"] = f"rider-{uuid4().hex[:6]}"
     publish("order.assigned", {"orderId": order_id, "riderId": assignment["rider_id"]})
 
-    steps = 10
+    # Simulate delivery in 20 steps over 2 minutes (6 seconds per step)
+    steps = 20
     for step in range(1, steps + 1):
-        time.sleep(1)
+        time.sleep(6)  # Each step takes 6 seconds
         frac = step / steps
         lat = assignment["start"][0] + (assignment["dest"][0] - assignment["start"][0]) * frac
         lng = assignment["start"][1] + (assignment["dest"][1] - assignment["start"][1]) * frac

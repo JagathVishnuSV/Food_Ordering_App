@@ -23,6 +23,8 @@ public class OrderController {
         this.publisher = publisher;
 
         app.post("/order", this::placeOrder);
+        app.get("/orders/{userId}", this::getUserOrders);
+        app.get("/order/{orderId}", this::getOrder);
         app.get("/health", ctx -> ctx.json(new HealthResponse(true)));
     }
 
@@ -55,6 +57,31 @@ public class OrderController {
             publisher.publish("order.placed", gson.toJson(new OrderPlacedEvent(order.id, order.status, order.total)));
 
             ctx.status(201).json(order);
+        } catch (Exception e) {
+            e.printStackTrace();
+            ctx.status(500).json(new ErrorResponse("server_error"));
+        }
+    }
+
+    private void getUserOrders(Context ctx) {
+        try {
+            String userId = ctx.pathParam("userId");
+            ctx.json(repo.findByUserId(userId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            ctx.status(500).json(new ErrorResponse("server_error"));
+        }
+    }
+
+    private void getOrder(Context ctx) {
+        try {
+            String orderId = ctx.pathParam("orderId");
+            Order order = repo.findById(orderId);
+            if (order == null) {
+                ctx.status(404).json(new ErrorResponse("order_not_found"));
+                return;
+            }
+            ctx.json(order);
         } catch (Exception e) {
             e.printStackTrace();
             ctx.status(500).json(new ErrorResponse("server_error"));

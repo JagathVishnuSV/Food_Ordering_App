@@ -26,7 +26,20 @@ public class App {
 
         Javalin app = Javalin.create(config -> {
             config.defaultContentType = "application/json";
-        }).start(port);
+        });
+
+        // Global CORS + preflight handling
+        app.before(ctx -> {
+            ctx.header("Access-Control-Allow-Origin", "*");
+            ctx.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            ctx.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+            ctx.header("Access-Control-Allow-Credentials", "true");
+            if ("OPTIONS".equalsIgnoreCase(ctx.method())) {
+                ctx.status(204).result("");
+            }
+        });
+
+        app.start(port);
 
         new OrderController(app, orderRepo, restaurantClient, publisher);
 

@@ -29,6 +29,26 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// Admin: create restaurant
+router.post('/admin/restaurants', admin, async (req, res) => {
+  try {
+    const created = await repo.create(req.body);
+    res.status(201).json(created);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// Admin: add menu item
+router.post('/admin/restaurants/:id/menu', admin, async (req, res) => {
+  try {
+    const updated = await repo.addMenuItem(req.params.id, req.body);
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 // Admin: replace pricing rules for a restaurant
 router.post('/admin/:id/pricing', admin, async (req, res) => {
   try {
