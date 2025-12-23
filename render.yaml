@@ -4,7 +4,7 @@ services:
     env: docker
     region: oregon
     dockerfilePath: user_service/Dockerfile
-    plan: starter
+    plan: free
     envVars:
       - key: PORT
         value: "3000"
@@ -22,7 +22,7 @@ services:
     env: docker
     region: oregon
     dockerfilePath: restaurant_service/Dockerfile
-    plan: starter
+    plan: free
     envVars:
       - key: PORT
         value: "3001"
@@ -38,7 +38,7 @@ services:
     env: docker
     region: oregon
     dockerfilePath: order_service/Dockerfile
-    plan: starter
+    plan: free
     envVars:
       - key: PORT
         value: "8080"
@@ -54,7 +54,7 @@ services:
     env: docker
     region: oregon
     dockerfilePath: delivery_service/Dockerfile
-    plan: starter
+    plan: free
     envVars:
       - key: PORT
         value: "8000"
@@ -68,7 +68,7 @@ services:
     env: docker
     region: oregon
     dockerfilePath: notification_service/Dockerfile
-    plan: starter
+    plan: free
     envVars:
       - key: PORT
         value: "8100"
@@ -84,7 +84,7 @@ services:
     env: docker
     region: oregon
     dockerfilePath: gateway/Dockerfile
-    plan: starter
+    plan: free
     envVars:
       - key: USER_SERVICE_URL
         value: "https://user-service-REPLACE.onrender.com"
