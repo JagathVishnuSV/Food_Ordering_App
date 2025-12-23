@@ -3,6 +3,7 @@ services:
     name: user-service
     env: docker
     region: oregon
+    rootDirectory : user_service
     dockerfilePath: user_service/Dockerfile
     plan: free
     envVars:
@@ -21,6 +22,7 @@ services:
     name: restaurant-service
     env: docker
     region: oregon
+    rootDirectory : restaurant_service
     dockerfilePath: restaurant_service/Dockerfile
     plan: free
     envVars:
@@ -37,6 +39,7 @@ services:
     name: order-service
     env: docker
     region: oregon
+    rootDirectory : order_service
     dockerfilePath: order_service/Dockerfile
     plan: free
     envVars:
@@ -53,6 +56,7 @@ services:
     name: delivery-service
     env: docker
     region: oregon
+    rootDirectory : delivery_service
     dockerfilePath: delivery_service/Dockerfile
     plan: free
     envVars:
@@ -67,6 +71,7 @@ services:
     name: notification-service
     env: docker
     region: oregon
+    rootDirectory : notification_service
     dockerfilePath: notification_service/Dockerfile
     plan: free
     envVars:
@@ -83,6 +88,7 @@ services:
     name: gateway
     env: docker
     region: oregon
+    rootDirectory : gateway
     dockerfilePath: gateway/Dockerfile
     plan: free
     envVars:
